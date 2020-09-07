@@ -3,13 +3,14 @@ import React, {
   useMemo,
   useEffect,
   useState,
-} from "react";
+} from "react"
 import ReactDom, {
   unmountComponentAtNode
-} from 'react-dom';
-import styled, { keyframes, css } from "styled-components";
-import { color, typography, messageBoxShadow } from "../shared/styles";
-import { Icon } from '../icons';
+} from 'react-dom'
+import styled, { keyframes, css } from "styled-components"
+import { color, typography, messageBoxShadow } from "../shared/styles"
+import { Icon } from '../icons'
+import { iconSpin } from '../shared/animation'
 
 export const messageOpenAnimate = keyframes`
   0% {
@@ -24,7 +25,7 @@ export const messageOpenAnimate = keyframes`
     opacity: 1;
     margin-top: 0;
   }
-`;
+`
 
 export const messageCloseAnimate = keyframes`
   0% {
@@ -35,15 +36,7 @@ export const messageCloseAnimate = keyframes`
     opacity: 0;
     margin-top: -30px;
   }
-`;
-export const iconSpin = keyframes`
-  0% {
-     transform: rotate(0deg);
-  }
-  100% {
-     transform: rotate(360deg);
-  }
-`;
+`
 
 const MessageText = styled.span<{ bg: string; fc: string }>`
   display: inline-block;
@@ -55,19 +48,19 @@ const MessageText = styled.span<{ bg: string; fc: string }>`
   margin: 10px;
   ${messageBoxShadow};
   border-radius: 2px;
-`;
+`
 
 const IconWrapper = styled.span<{ spin?: boolean }>`
   margin-right: 10px;
   & > svg {
     font-size: ${typography.size.s2}px;
     ${(props) =>
-      props.spin &&
-      css`
+  props.spin &&
+  css`
         animation: ${iconSpin} 2s linear infinite;
       `}
   }
-`;
+`
 
 const MessageTextWrapper = styled.div<{
   openState: boolean;
@@ -75,16 +68,16 @@ const MessageTextWrapper = styled.div<{
   ani: number;
 }>`
   ${(props) =>
-    props.openState &&
-    css`
+  props.openState &&
+  css`
       animation: ${messageOpenAnimate} ${props.ani / 1000}s ease-in;
     `}
   ${(props) =>
-    props.closeState &&
-    css`
+  props.closeState &&
+  css`
       animation: ${messageCloseAnimate} ${props.ani / 1000}s ease-in;
     `}
-`;
+`
 
 export type MessageType =
   | "info"
@@ -116,15 +109,15 @@ const defaultConfig: MessageConfig = {
   animationDuring: 300,
   background: color.lightest,
   color: color.dark,
-};
+}
 
-let wrap: HTMLElement;
+let wrap: HTMLElement
 export const createMessage = (type: MessageType) => {
   return (content: ReactNode, config: Partial<MessageConfig> = {}) => {
-    const fconfig = { ...defaultConfig, ...config };
+    const fconfig = { ...defaultConfig, ...config }
     if (!wrap) {
       //如果有的话，说明已经调用过这个函数了，这个空div就可以一直复用
-      wrap = document.createElement("div");
+      wrap = document.createElement("div")
       wrap.style.cssText = `
       line-height:1.5;
       text-align:center;
@@ -139,16 +132,16 @@ export const createMessage = (type: MessageType) => {
       top: 16px;
       left: 0;
       pointer-events: none;
-      `;
-  
+      `
+
       if (wrap) {
-        document.body && document.body.appendChild(wrap); //挂body上
+        document.body && document.body.appendChild(wrap) //挂body上
       }
     }
 
-    
-    const divs = document.createElement("div");
-    wrap.appendChild(divs);
+
+    const divs = document.createElement("div")
+    wrap.appendChild(divs)
     ReactDom.render(
       <Message
         rootDom={wrap}
@@ -158,9 +151,9 @@ export const createMessage = (type: MessageType) => {
         iconType={type}
       />,
       divs
-    );
-  };
-};
+    )
+  }
+}
 
 export type MessageProps = {
   rootDom: HTMLElement; //这个用来干掉parentDom 这个可以常驻
@@ -171,78 +164,78 @@ export type MessageProps = {
 };
 
 export function Message(props: MessageProps) {
-  const { rootDom, parentDom, content, fconfig, iconType } = props;
-  const [close, setClose] = useState(false);
+  const { rootDom, parentDom, content, fconfig, iconType } = props
+  const [close, setClose] = useState(false)
 
   const renderIcon = useMemo(() => {
     switch (iconType) {
       case "default":
-        return null;
+        return null
       case "info":
         return (
           <IconWrapper>
             <Icon icon="info" color={color.primary}></Icon>
           </IconWrapper>
-        );
+        )
       case "success":
         return (
           <IconWrapper>
             <Icon icon="check" color={color.positive}></Icon>
           </IconWrapper>
-        );
+        )
       case "error":
         return (
           <IconWrapper>
             <Icon icon="closeAlt" color={color.negative}></Icon>
           </IconWrapper>
-        );
+        )
       case "warning":
         return (
           <IconWrapper>
             <Icon icon="info" color={color.warning}></Icon>
           </IconWrapper>
-        );
+        )
       case "loading":
         return (
           <IconWrapper spin={true}>
             <Icon icon="sync"></Icon>
           </IconWrapper>
-        );
+        )
       default:
-        return null;
+        return null
     }
-  }, [iconType]);
+  }, [iconType])
 
   const unmount = useMemo(() => {
     return () => {
       if (parentDom && rootDom) {
-        unmountComponentAtNode(parentDom);
-        rootDom.removeChild(parentDom);
+        unmountComponentAtNode(parentDom)
+        rootDom.removeChild(parentDom)
       }
-    };
-  }, [parentDom, rootDom]);
+    }
+  }, [parentDom, rootDom])
 
   useEffect(() => {
     //结束操作
-    let closeStart = fconfig.delay - fconfig.animationDuring;
+    let closeStart = fconfig.delay - fconfig.animationDuring
     let timer1 = window.setTimeout(
       () => {
-        setClose(true);
+        setClose(true)
       },
       closeStart > 0 ? closeStart : 0
-    );
+    )
     let timer2 = window.setTimeout(() => {
-      setClose(false);
-      unmount();
+      setClose(false)
+      unmount()
       if (fconfig.callback) {
-        fconfig.callback();
+        fconfig.callback()
       }
-    }, fconfig.delay);
+    }, fconfig.delay)
     return () => {
-      window.clearTimeout(timer1);
-      window.clearTimeout(timer2);
-    };
-  }, [unmount, fconfig]);
+      window.clearTimeout(timer1)
+      window.clearTimeout(timer2)
+    }
+  }, [unmount, fconfig])
 
   return (
     <MessageTextWrapper
@@ -255,7 +248,7 @@ export function Message(props: MessageProps) {
         {content}
       </MessageText>
     </MessageTextWrapper>
-  );
+  )
 }
 
 export const message = {

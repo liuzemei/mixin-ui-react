@@ -6,36 +6,13 @@ import React, {
   useState,
   useRef,
   useEffect,
-} from "react";
-import { createPortal } from "react-dom";
-import { Button } from "../button";
-import { Icon } from "../icons";
-import styled, { css, keyframes } from "styled-components";
-import { typography } from "../shared/styles";
-
-export const modalOpenAnimate = keyframes`
-  0% {
-    opacity: 0;
-    transform: scaleY(0,0);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1,1);
-    transform-origin: center;
-  }
-`;
-
-export const modalCloseAnimate = keyframes`
-  0% {
-    opacity: 0;
-    transform: scale(1,1);
-    transform-origin: center;
-  }
-  100% {
-    opacity: 0;
-    transform: scaleY(0,0);
-  }
-`;
+} from "react"
+import { createPortal } from "react-dom"
+import { Button } from "../button"
+import { Icon } from "../icons"
+import styled, { css } from "styled-components"
+import { typography } from "../shared/styles"
+import { modalOpenAnimate, modalCloseAnimate } from '../shared/animation'
 
 const ModalWrapper = styled.div`
   position: fixed;
@@ -44,7 +21,7 @@ const ModalWrapper = styled.div`
   right: 0;
   bottom: 0;
   z-index: 1000;
-`;
+`
 
 const ModalViewPort = styled.div<{ visible: boolean; delay: number }>`
   background: #fff;
@@ -62,16 +39,16 @@ const ModalViewPort = styled.div<{ visible: boolean; delay: number }>`
   width: 30%;
   z-index: 1001;
   ${(props) =>
-    props.visible &&
-    css`
+  props.visible &&
+  css`
       animation: ${modalOpenAnimate} ${props.delay / 1000}s ease-in;
     `}
   ${(props) =>
-    !props.visible &&
-    css`
+  !props.visible &&
+  css`
       animation: ${modalCloseAnimate} ${props.delay / 1000}s ease-in;
     `}
-`;
+`
 
 const ModalMask = styled.div`
   background-color: rgba(0, 0, 0, 0.45);
@@ -80,25 +57,25 @@ const ModalMask = styled.div`
   position: fixed;
   right: 0;
   top: 0;
-`;
+`
 
 const CloseBtn = styled.div`
   position: absolute;
   right: 5px;
   top: 5px;
-`;
+`
 
 const ConfirmWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   align-item: center;
   padding: 10px;
-`;
+`
 
 const ChildrenWrapper = styled.div`
   min-height: 100px;
   padding: 10px;
-`;
+`
 
 const TitleWrapper = styled.div`
   height: 30px;
@@ -106,7 +83,7 @@ const TitleWrapper = styled.div`
   font-size: ${typography.size.m2}px;
   font-weight: ${typography.weight.bold};
   padding: 5px;
-`;
+`
 
 export type ModalProps = {
   /** 父组件用来控制的状态 */
@@ -153,34 +130,34 @@ export function useStateAnimation(
   parentSetState: (v: boolean) => void,
   delay: number = 300
 ): [boolean, (v: boolean) => void, () => void] {
-  const [state, setState] = useState(true);
+  const [state, setState] = useState(true)
   const [innerClose, unmount] = useMemo(() => {
-    let timer: number;
+    let timer: number
     let innerclose = (v: boolean) => {
-      setState(v);
+      setState(v)
       timer = window.setTimeout(() => {
-        parentSetState(v);
-        setState(true);
-      }, delay);
-    };
-    let unmount = () => window.clearTimeout(timer);
-    return [innerclose, unmount];
-  }, [setState, parentSetState, delay]);
-  return [state, innerClose, unmount];
+        parentSetState(v)
+        setState(true)
+      }, delay)
+    }
+    let unmount = () => window.clearTimeout(timer)
+    return [innerclose, unmount]
+  }, [setState, parentSetState, delay])
+  return [state, innerClose, unmount]
 }
 
 export function useStopScroll(state: boolean, delay: number, open?: boolean) {
   if (open) {
-    let width = window.innerWidth - document.body.clientWidth;
+    let width = window.innerWidth - document.body.clientWidth
     if (state) {
-      document.body.style.overflow = "hidden";
-      document.body.style.width = `calc(100% - ${width}px)`;
+      document.body.style.overflow = "hidden"
+      document.body.style.width = `calc(100% - ${width}px)`
     } else {
       //等动画渲染
       setTimeout(() => {
-        document.body.style.overflow = "auto";
-        document.body.style.width = `100%`;
-      }, delay);
+        document.body.style.overflow = "auto"
+        document.body.style.width = `100%`
+      }, delay)
     }
   }
 }
@@ -206,15 +183,15 @@ export function Modal(props: PropsWithChildren<ModalProps>) {
     portralStyle,
     refCallback,
     closeCallback,
-  } = props;
-  const ref = useRef<HTMLDivElement>(null);
+  } = props
+  const ref = useRef<HTMLDivElement>(null)
 
-  const [state, setState, unmount] = useStateAnimation(parentSetState, delay);
+  const [state, setState, unmount] = useStateAnimation(parentSetState, delay)
 
   const render = useMemo(() => {
     if (!visible) {
-      unmount();
-      return null;
+      unmount()
+      return null
     } else {
       return createPortal(
         <ModalWrapper ref={ref} style={portralStyle}>
@@ -230,8 +207,8 @@ export function Modal(props: PropsWithChildren<ModalProps>) {
                       padding: "5px",
                     }}
                     onClick={() => {
-                      setState(false);
-                      if (closeCallback) closeCallback();
+                      setState(false)
+                      if (closeCallback) closeCallback()
                     }}
                   >
                     <Icon icon="closeAlt"></Icon>
@@ -245,8 +222,8 @@ export function Modal(props: PropsWithChildren<ModalProps>) {
                 <Button
                   appearance="secondary"
                   onClick={() => {
-                    onOk ? onOk(setState) : setState(false);
-                    if (callback) callback(true);
+                    onOk ? onOk(setState) : setState(false)
+                    if (callback) callback(true)
                   }}
                 >
                   {okText ? okText : "确认"}
@@ -254,8 +231,8 @@ export function Modal(props: PropsWithChildren<ModalProps>) {
                 <Button
                   appearance="secondary"
                   onClick={() => {
-                    onCancel ? onCancel(setState) : setState(false);
-                    if (callback) callback(false);
+                    onCancel ? onCancel(setState) : setState(false)
+                    if (callback) callback(false)
                   }}
                   style={{ marginLeft: "10px" }}
                 >
@@ -268,17 +245,17 @@ export function Modal(props: PropsWithChildren<ModalProps>) {
             <ModalMask
               onClick={() => {
                 if (maskClose) {
-                  setState(false);
+                  setState(false)
                   if (closeCallback) {
-                    closeCallback();
+                    closeCallback()
                   }
                 }
               }}
-            ></ModalMask>
+            />
           )}
         </ModalWrapper>,
         container!
-      );
+      )
     }
   }, [
     callback,
@@ -301,14 +278,14 @@ export function Modal(props: PropsWithChildren<ModalProps>) {
     visible,
     delay,
     unmount,
-  ]);
-  useStopScroll(visible!, 300, stopScroll!);
+  ])
+  useStopScroll(visible!, 300, stopScroll!)
   useEffect(() => {
     if (refCallback && ref.current) {
-      refCallback(ref.current);
+      refCallback(ref.current)
     }
-  }, [refCallback]);
-  return <>{render}</>;
+  }, [refCallback])
+  return <>{render}</>
 }
 
 Modal.defaultProps = {
